@@ -59,7 +59,7 @@ public class Confuse extends Module {
 
     private final Setting<SortPriority> priority = sgGeneral.add(new EnumSetting.Builder<SortPriority>()
             .name("priority")
-            .description("Targetting priority")
+            .description("Targeting priority")
             .defaultValue(SortPriority.LowestHealth)
             .build()
     );
@@ -120,7 +120,7 @@ public class Confuse extends Module {
         delayWaited = 0;
 
 
-        // Targetting
+        // Targeting
         target = TargetUtils.getPlayerTarget(range.get(), priority.get());
 
         if (target == null) return;
