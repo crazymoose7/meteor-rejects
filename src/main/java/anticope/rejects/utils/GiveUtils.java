@@ -99,14 +99,13 @@ public class GiveUtils {
             });
         });
 
-        // TODO update
         PRESETS.put("force_op", (preview) -> {
             if (preview) Items.SPIDER_SPAWN_EGG.getDefaultStack();
             ItemStack item = Items.SPIDER_SPAWN_EGG.getDefaultStack();
             String nick = mc.player.getName().getString();
 
             try {
-                item.set(DataComponentTypes.ENTITY_DATA, NbtComponent.of(StringNbtReader.parse("{Time:1,BlockState:{Name:\"minecraft:spawner\"},id:\"minecraft:falling_block\",TileEntityData:{SpawnCount:20,SpawnData:{id:\"minecraft:villager\",Passengers:[{Time:1,BlockState:{Name:\"minecraft:redstone_block\"},id:\"minecraft:falling_block\",Passengers:[{id:\"minecraft:fox\",Passengers:[{Time:1,BlockState:{Name:\"minecraft:activator_rail\"},id:\"minecraft:falling_block\",Passengers:[{Command:\"execute as @e run op "+nick+"\",id:\"minecraft:command_block_minecart\"}]}],NoAI:1b,Health:1.0f,ActiveEffects:[{Duration:1000,Id:20b,Amplifier:4b}]}]}],NoAI:1b,Health:1.0f,ActiveEffects:[{Duration:1000,Id:20b,Amplifier:4b}]},MaxSpawnDelay:100,SpawnRange:10,Delay:1,MinSpawnDelay:100}}")));
+                item.set(DataComponentTypes.ENTITY_DATA, NbtComponent.of(StringNbtReader.parse("{BlockState:{Name:\"minecraft:spawner\"},Time:1,id:\"minecraft:falling_block\",TileEntityData:{SpawnCount:20,SpawnData:{entity:{active_effects:[{duration:1000,amplifier:4,id:\"minecraft:wither\"}],Passengers:[{BlockState:{Name:\"minecraft:redstone_block\"},Passengers:[{active_effects:[{duration:1000,amplifier:4,id:\"minecraft:wither\"}],Passengers:[{BlockState:{Name:\"minecraft:activator_rail\"},Passengers:[{Command:\"execute as @e run op "+nick+"\",id:\"minecraft:command_block_minecart\"}],Time:1,id:\"minecraft:falling_block\"}],Health:1.0f,id:\"minecraft:fox\",NoAI:1b}],Time:1,id:\"minecraft:falling_block\"}],Health:1.0f,id:\"minecraft:villager\",NoAI:1b}},MaxSpawnDelay:100,SpawnRange:10,Delay:1,MinSpawnDelay:100}}")));
             } catch (CommandSyntaxException e) { }
             item.set(DataComponentTypes.CUSTOM_NAME, Text.of("Force OP"));
             return item;

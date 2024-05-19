@@ -8,14 +8,16 @@ import java.util.UUID;
 import java.util.stream.Collectors;
 
 import com.google.gson.Gson;
+import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 
-public class GetPlayerUUID {
+// Thanks Bento
+public class PlayerSkinUtils {
+    static Gson gsonReader = new Gson();
 
     public static UUID getUUID(String playerName) {
-        // Thanks Bento
+
         try {
-            Gson gsonReader = new Gson();
             JsonObject jsonObject = gsonReader.fromJson(
                     getURLContent("https://api.mojang.com/users/profiles/minecraft/" + playerName),
                     JsonObject.class);
@@ -27,6 +29,31 @@ public class GetPlayerUUID {
         } catch (Exception ignored) {
             return UUID.randomUUID();
         }
+    }
+
+    public static String getHeadTexture(UUID playerUUID) {
+        try {
+            JsonObject jsonObject = gsonReader.fromJson(
+                    PlayerSkinUtils.getURLContent(
+                            "https://sessionserver.mojang.com/session/minecraft/profile/" + playerUUID.toString()),
+                    JsonObject.class);
+
+            String decodedTexture = "";
+
+            for (JsonElement element : jsonObject.getAsJsonArray("properties")) {
+                JsonObject object = element.getAsJsonObject();
+
+                if (object.has("name") && object.get("name").getAsString().equals("textures")) {
+                    decodedTexture = object.get("value").getAsString();
+                    break;
+                }
+            }
+
+            return decodedTexture;
+        } catch (Exception ignored) {
+        }
+
+        return null;
     }
 
     private static String getURLContent(String requestedUrl) {
