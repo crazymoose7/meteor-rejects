@@ -12,6 +12,7 @@ import meteordevelopment.meteorclient.systems.modules.Module;
 import meteordevelopment.meteorclient.utils.player.ChatUtils;
 import meteordevelopment.orbit.EventHandler;
 import net.minecraft.entity.Entity;
+import net.minecraft.network.packet.c2s.play.ClientCommandC2SPacket;
 import net.minecraft.network.packet.c2s.play.VehicleMoveC2SPacket;
 import net.minecraft.network.packet.s2c.play.EntitiesDestroyS2CPacket;
 import net.minecraft.network.packet.s2c.play.EntityPassengersSetS2CPacket;
@@ -35,45 +36,18 @@ public class EntityDesync extends Module {
         if (riding == null) {
             return;
         }
-
-        if (mc.player.hasVehicle()) {
-            return;
-        }
-
         riding.setPos(mc.player.getX(), mc.player.getY(), mc.player.getZ());
         mc.getNetworkHandler().sendPacket(new VehicleMoveC2SPacket(riding));
     }
 
     @EventHandler
     private void onPacketReceive(PacketEvent.Receive event) {
-        if (event.packet instanceof EntityPassengersSetS2CPacket) {
-            if (riding == null) {
-                return;
-            }
-
-            EntityPassengersSetS2CPacket packet = (EntityPassengersSetS2CPacket) event.packet;
-            Entity entity = mc.world.getEntityById(packet.getId());
-
-            if (entity == riding) {
-                for (int i : packet.getPassengerIds()) {
-                    Entity entityPlayer = mc.world.getEntityById(i);
-
-                    if (entityPlayer == mc.player) {
-                        return;
-                    }
-                }
-
-                ChatUtils.sendMsg(Text.of("You dismounted. RIP"));
+        if (event.packet instanceof ClientCommandC2SPacket) {
+            ChatUtils.sendMsg(Text.of("test"));
+            ClientCommandC2SPacket packet = (ClientCommandC2SPacket)event.packet;
+            if (packet.getMode() == ClientCommandC2SPacket.Mode.PRESS_SHIFT_KEY) {
+                ChatUtils.sendMsg(Text.of("Dismount"));
                 toggle();
-            }
-        } else if (event.packet instanceof EntitiesDestroyS2CPacket) {
-            EntitiesDestroyS2CPacket packet = (EntitiesDestroyS2CPacket) event.packet;
-
-            for (int entityId : packet.getEntityIds()) {
-                if (entityId == riding.getId()) {
-                    ChatUtils.sendMsg(Text.of("Entity is now null"));
-                    return;
-                }
             }
         }
     }
@@ -90,31 +64,25 @@ public class EntityDesync extends Module {
 
     @Override
     public void onActivate() {
-
-        if (mc.player == null) {
+        if (mc.player != null) {
+            if (!mc.player.isRiding()) {
+                riding = mc.player.getVehicle();
+                mc.world.removeEntity(riding.getId(), Entity.RemovalReason.UNLOADED_TO_CHUNK);
+            } else {
+                ChatUtils.sendMsg(Text.of("You are not riding an entity."));
+                riding = null;
+                toggle();
+            }
+        } else {
             riding = null;
             toggle();
-            return;
         }
-
-        if (mc.player.isOnGround()) {
-            ChatUtils.sendMsg(Text.of("You are not riding an entity."));
-            mc.player.openRidingInventory();
-            riding = null;
-            toggle();
-            return;
-        }
-
-        riding = mc.player.getVehicle();
-        mc.player.dismountVehicle();
-        mc.world.removeEntity(riding.getId(), Entity.RemovalReason.KILLED);
     }
 
     @Override
     public void onDeactivate() {
         if (riding != null) {
-            // Riding.isDead = false;
-            if (mc.player.isOnGround()) {
+            if (mc.player.isRiding()) {
                 mc.world.spawnEntity(riding);
                 mc.player.startRiding(riding, true);
             }
