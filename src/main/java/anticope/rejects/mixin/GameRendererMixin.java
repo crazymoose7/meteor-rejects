@@ -4,6 +4,8 @@ import anticope.rejects.modules.Rendering;
 import meteordevelopment.meteorclient.systems.modules.Modules;
 
 import net.minecraft.client.gl.PostEffectProcessor;
+import net.minecraft.client.render.DefaultFramebufferSet;
+import net.minecraft.client.render.FrameGraphBuilder;
 import net.minecraft.client.render.RenderTickCounter;
 import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
@@ -26,8 +28,7 @@ public class GameRendererMixin {
         PostEffectProcessor shader = renderingModule.getShaderEffect();
 
         if (shader != null) {
-            shader.setupDimensions(client.getWindow().getFramebufferWidth(), client.getWindow().getFramebufferHeight());
-			shader.render(tickCounter.getTickDelta(tick));
+            shader.render(new FrameGraphBuilder(), client.getFramebuffer().textureWidth, client.getFramebuffer().textureHeight, new DefaultFramebufferSet());
         }
     }
 }

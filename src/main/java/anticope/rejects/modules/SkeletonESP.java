@@ -17,6 +17,7 @@ import meteordevelopment.meteorclient.utils.render.color.Color;
 import meteordevelopment.meteorclient.utils.render.color.SettingColor;
 import meteordevelopment.orbit.EventHandler;
 import net.minecraft.client.MinecraftClient;
+import net.minecraft.client.gl.ShaderProgramKeys;
 import net.minecraft.client.model.ModelPart;
 import net.minecraft.client.option.Perspective;
 import net.minecraft.client.render.*;
@@ -61,7 +62,7 @@ public class SkeletonESP extends Module {
         MatrixStack matrixStack = event.matrices;
         float g = event.tickDelta;
 
-        RenderSystem.setShader(GameRenderer::getPositionColorProgram);
+        RenderSystem.setShader(ShaderProgramKeys.POSITION_TEX_COLOR);
         RenderSystem.enableBlend();
         RenderSystem.defaultBlendFunc();
         RenderSystem.disableDepthTest();
@@ -79,8 +80,8 @@ public class SkeletonESP extends Module {
             PlayerEntity playerEntity = (PlayerEntity) entity;
 
             Vec3d footPos = getEntityRenderPosition(playerEntity, g);
-            PlayerEntityRenderer livingEntityRenderer = (PlayerEntityRenderer) (LivingEntityRenderer<?, ?>) mc.getEntityRenderDispatcher().getRenderer(playerEntity);
-            PlayerEntityModel<PlayerEntity> playerEntityModel = (PlayerEntityModel) livingEntityRenderer.getModel();
+            PlayerEntityRenderer livingEntityRenderer = (PlayerEntityRenderer) (LivingEntityRenderer<?, ?, ?>) mc.getEntityRenderDispatcher().getRenderer(playerEntity);
+            PlayerEntityModel playerEntityModel = livingEntityRenderer.getModel();
 
             float h = MathHelper.lerpAngleDegrees(g, playerEntity.prevBodyYaw, playerEntity.bodyYaw);
             if (mc.player == entity && Rotations.rotationTimer < rotationHoldTicks) h = Rotations.serverYaw;
@@ -94,12 +95,12 @@ public class SkeletonESP extends Module {
             float m = playerEntity.getPitch(g);
             if (mc.player == entity && Rotations.rotationTimer < rotationHoldTicks) m = Rotations.serverPitch;
 
-            playerEntityModel.animateModel(playerEntity, q, p, g);
-            playerEntityModel.setAngles(playerEntity, q, p, o, k, m);
+            //playerEntityModel.animateModel(playerEntity, q, p, g);
+            //playerEntityModel.setAngles(playerEntity, q, p, o, k, m);
 
             boolean swimming = playerEntity.isInSwimmingPose();
             boolean sneaking = playerEntity.isSneaking();
-            boolean flying = playerEntity.isFallFlying();
+            boolean flying = playerEntity.isGliding();
 
             ModelPart head = playerEntityModel.head;
             ModelPart leftArm = playerEntityModel.leftArm;
@@ -189,7 +190,7 @@ public class SkeletonESP extends Module {
         RenderSystem.disableBlend();
         RenderSystem.enableDepthTest();
         RenderSystem.depthMask(true);
-        RenderSystem.setShader(GameRenderer::getPositionColorProgram);
+        RenderSystem.setShader(ShaderProgramKeys.POSITION_TEX_COLOR);
     }
 
     private void rotate(MatrixStack matrix, ModelPart modelPart) {

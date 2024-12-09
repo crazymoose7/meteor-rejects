@@ -17,6 +17,7 @@ import net.minecraft.nbt.NbtList;
 import net.minecraft.nbt.StringNbtReader;
 import net.minecraft.registry.Registries;
 import net.minecraft.registry.Registry;
+import net.minecraft.registry.RegistryKey;
 import net.minecraft.registry.RegistryKeys;
 import net.minecraft.registry.entry.RegistryEntry;
 import net.minecraft.text.Text;
@@ -68,7 +69,6 @@ public class GiveUtils {
     );
 
     private static final Random random = new Random();
-    private static Registry<Enchantment> enchantmentRegistry;
 
     public static void giveItem(ItemStack item) throws CommandSyntaxException {
         if (!mc.player.getAbilities().creativeMode) throw NOT_IN_CREATIVE.create();
@@ -132,27 +132,26 @@ public class GiveUtils {
             }
 
             stack.set(DataComponentTypes.POTION_CONTENTS, new PotionContentsComponent(Optional.empty(), Optional.empty(),
-                    effects));
+                    effects, Optional.empty()));
             stack.set(DataComponentTypes.CUSTOM_NAME, Text.literal("Lingering Potion of Trolling"));
             return stack;
         });
 
         PRESETS.put("32k", (preview) -> {
-            enchantmentRegistry = mc.world.getRegistryManager().get(RegistryKeys.ENCHANTMENT);
 
-            if (preview || enchantmentRegistry == null) return Items.DIAMOND_SWORD.getDefaultStack();
+            if (preview == null) return Items.DIAMOND_SWORD.getDefaultStack();
             ItemStack stack = Items.DIAMOND_SWORD.getDefaultStack();
 
             stack.apply(DataComponentTypes.ENCHANTMENTS, ItemEnchantmentsComponent.DEFAULT, component -> {
                 ItemEnchantmentsComponent.Builder builder = new ItemEnchantmentsComponent.Builder(component);
-                builder.add(enchantmentRegistry.entryOf(Enchantments.SHARPNESS), 255);
-                builder.add(enchantmentRegistry.entryOf(Enchantments.KNOCKBACK), 255);
-                builder.add(enchantmentRegistry.entryOf(Enchantments.FIRE_ASPECT), 255);
-                builder.add(enchantmentRegistry.entryOf(Enchantments.LOOTING), 10);
-                builder.add(enchantmentRegistry.entryOf(Enchantments.SWEEPING_EDGE), 3);
-                builder.add(enchantmentRegistry.entryOf(Enchantments.UNBREAKING), 255);
-                builder.add(enchantmentRegistry.entryOf(Enchantments.MENDING), 1);
-                builder.add(enchantmentRegistry.entryOf(Enchantments.VANISHING_CURSE), 1);
+                builder.add(getEnchantmentReference("minecraft:sharpness"), 255);
+                builder.add(getEnchantmentReference("minecraft:knockback"), 255);
+                builder.add(getEnchantmentReference("minecraft:fire_aspect"), 255);
+                builder.add(getEnchantmentReference("minecraft:looting"), 10);
+                builder.add(getEnchantmentReference("minecraft:sweeping_edge"), 3);
+                builder.add(getEnchantmentReference("minecraft:unbreaking"), 255);
+                builder.add(getEnchantmentReference("minecraft:mending"), 1);
+                builder.add(getEnchantmentReference("minecraft:vanishing_curse"), 1);
                 return builder.build();
             });
 
@@ -222,4 +221,10 @@ public class GiveUtils {
         return WordUtils.capitalizeFully(id.toString().replace("_", " "));
     }
 
+    public static RegistryEntry.Reference<Enchantment> getEnchantmentReference(String enchantmentId) {
+        Identifier identifier = Identifier.of(enchantmentId);
+        RegistryKey<Enchantment> registryKey = RegistryKey.of(RegistryKeys.ENCHANTMENT, identifier);
+
+        return mc.getNetworkHandler().getRegistryManager().getOptional(RegistryKeys.ENCHANTMENT).get().getOrThrow(registryKey);
+    }
 }

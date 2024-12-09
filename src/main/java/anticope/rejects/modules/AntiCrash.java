@@ -29,22 +29,18 @@ public class AntiCrash extends Module {
     @EventHandler
     private void onPacketReceive(PacketEvent.Receive event) {
         if (event.packet instanceof ExplosionS2CPacket packet) {
-            if (/* outside of world */ packet.getX() > 30_000_000 || packet.getY() > 30_000_000 || packet.getZ() > 30_000_000 || packet.getX() < -30_000_000 || packet.getY() < -30_000_000 || packet.getZ() < -30_000_000 ||
-                    // power too high
-                    packet.getRadius() > 1000 ||
-                    // too many blocks
-                    packet.getAffectedBlocks().size() > 100_000 ||
-                    // too much knockback
-                    packet.getPlayerVelocityX() > 30_000_000 || packet.getPlayerVelocityY() > 30_000_000 || packet.getPlayerVelocityZ() > 30_000_000
+            if (/* outside of world */ packet.center().getX() > 30_000_000 || packet.center().getY() > 30_000_000 || packet.center().getZ() > 30_000_000 || packet.center().getX() < -30_000_000 || packet.center().getY() < -30_000_000 || packet.center().getZ() < -30_000_000 ||
+                    // too much knockback - isPresnt
+                    packet.playerKnockback().get().getX() > 30_000_000 || packet.playerKnockback().get().getY() > 30_000_000 || packet.playerKnockback().get().getZ() > 30_000_000
                     // knockback can be negative?
-                    || packet.getPlayerVelocityX() < -30_000_000 || packet.getPlayerVelocityY() < -30_000_000 || packet.getPlayerVelocityZ() < -30_000_000
+                    || packet.playerKnockback().get().getX() < -30_000_000 || packet.playerKnockback().get().getY() < -30_000_000 || packet.playerKnockback().get().getZ() < -30_000_000
             ) cancel(event);
         } else if (event.packet instanceof ParticleS2CPacket packet) {
             // too many particles
             if (packet.getCount() > 100_000) cancel(event);
         } else if (event.packet instanceof PlayerPositionLookS2CPacket packet) {
             // out of world movement
-            if (packet.getX() > 30_000_000 || packet.getY() > 30_000_000 || packet.getZ() > 30_000_000 || packet.getX() < -30_000_000 || packet.getY() < -30_000_000 || packet.getZ() < -30_000_000)
+            if (packet.change().position().getX() > 30_000_000 || packet.change().position().getY() > 30_000_000 || packet.change().position().getZ() > 30_000_000 || packet.change().position().getX() < -30_000_000 || packet.change().position().getY() < -30_000_000 || packet.change().position().getZ() < -30_000_000)
                 cancel(event);
         } else if (event.packet instanceof EntityVelocityUpdateS2CPacket packet) {
             // velocity
