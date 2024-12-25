@@ -7,10 +7,9 @@ import meteordevelopment.meteorclient.settings.Setting;
 import meteordevelopment.meteorclient.settings.SettingGroup;
 import meteordevelopment.meteorclient.systems.modules.Module;
 import meteordevelopment.orbit.EventHandler;
+import net.minecraft.component.DataComponentTypes;
 import net.minecraft.entity.EquipmentSlot;
-import net.minecraft.item.ElytraItem;
 import net.minecraft.item.ItemStack;
-import net.minecraft.item.Items;
 import net.minecraft.network.packet.c2s.play.ClientCommandC2SPacket;
 import net.minecraft.util.math.MathHelper;
 import net.minecraft.util.math.Vec3d;
@@ -69,10 +68,10 @@ public class ExtraElytra extends Module {
             jumpTimer--;
 
         ItemStack chest = mc.player.getEquippedStack(EquipmentSlot.CHEST);
-        if (chest.getItem() != Items.ELYTRA)
+        if (!chest.contains(DataComponentTypes.GLIDER))
             return;
 
-        if (mc.player.isFallFlying()) {
+        if (mc.player.isGliding()) {
             if (stopInWater.get() && mc.player.isTouchingWater()) {
                 sendStartStopPacket();
                 return;
@@ -83,7 +82,7 @@ public class ExtraElytra extends Module {
             return;
         }
 
-        if (ElytraItem.isUsable(chest) && mc.options.jumpKey.isPressed())
+        if (mc.options.jumpKey.isPressed())
             doInstantFly();
     }
 

@@ -5,6 +5,7 @@ import meteordevelopment.meteorclient.systems.modules.Modules;
 
 import net.minecraft.client.gl.PostEffectProcessor;
 import net.minecraft.client.render.RenderTickCounter;
+import net.minecraft.client.util.Pool;
 import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
@@ -26,8 +27,7 @@ public class GameRendererMixin {
         PostEffectProcessor shader = renderingModule.getShaderEffect();
 
         if (shader != null) {
-            shader.setupDimensions(client.getWindow().getFramebufferWidth(), client.getWindow().getFramebufferHeight());
-			shader.render(tickCounter.getTickDelta(tick));
+            shader.render(client.getFramebuffer(), new Pool(3));
         }
     }
 }

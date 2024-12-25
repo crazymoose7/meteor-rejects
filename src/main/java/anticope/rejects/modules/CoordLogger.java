@@ -79,7 +79,6 @@ public class CoordLogger extends Module {
             .defaultValue(false)
             .build()
     );
-    
 
     private final Setting<Boolean> otherEvents = sgWorldEvents.add(new BoolSetting.Builder()
             .name("other-global-events")
@@ -99,11 +98,11 @@ public class CoordLogger extends Module {
             EntityPositionS2CPacket packet = (EntityPositionS2CPacket) event.packet;
             
             try {
-                Entity entity = mc.world.getEntityById(packet.getId());
+                Entity entity = mc.world.getEntityById(packet.entityId());
                 
                 // Player teleport
                 if (entity.getType().equals(EntityType.PLAYER) && players.get()) {
-                    Vec3d packetPosition = new Vec3d(packet.getX(), packet.getY(), packet.getZ());
+                    Vec3d packetPosition = packet.change().position();
                     Vec3d playerPosition = entity.getPos();
                     
                     if (playerPosition.distanceTo(packetPosition) >= minDistance.get()) {
@@ -113,7 +112,7 @@ public class CoordLogger extends Module {
 
                 // World teleport
                 else if (entity.getType().equals(EntityType.WOLF) && wolves.get()) {
-                    Vec3d packetPosition = new Vec3d(packet.getX(), packet.getY(), packet.getZ());
+                    Vec3d packetPosition = packet.change().position();
                     Vec3d wolfPosition = entity.getPos();
                     
                     UUID ownerUuid = ((TameableEntity) entity).getOwnerUuid();
@@ -127,7 +126,7 @@ public class CoordLogger extends Module {
         // World events
         } else if (event.packet instanceof WorldEventS2CPacket) {
             WorldEventS2CPacket worldEventS2CPacket = (WorldEventS2CPacket) event.packet;
-            
+
             if (worldEventS2CPacket.isGlobal()) {
                 // Min distance
                 if (PlayerUtils.distanceTo(worldEventS2CPacket.getPos()) <= minDistance.get()) return;

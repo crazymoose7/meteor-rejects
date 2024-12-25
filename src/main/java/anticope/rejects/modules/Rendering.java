@@ -107,12 +107,8 @@ public class Rendering extends Module {
         else if (s == Shader.Scanline) name = "scan_pincushion";
         else name = s.toString().toLowerCase();
         Identifier shaderID = Identifier.of(String.format("shaders/post/%s.json", name));
-        try {
-            PostEffectProcessor shader = new PostEffectProcessor(mc.getTextureManager(), mc.getResourceManager(), mc.getFramebuffer(), shaderID);
-            this.shader = shader;
-        } catch (IOException e) {
-            this.shader = null;
-        }
+        //PostEffectProcessor shader = new PostEffectProcessor(mc.getTextureManager(), mc.getResourceManager(), mc.getFramebuffer(), shaderID);
+        this.shader = shader;
     }
 
     public boolean renderStructureVoid() {
