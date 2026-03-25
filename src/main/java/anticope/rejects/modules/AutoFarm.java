@@ -21,19 +21,7 @@ import net.minecraft.world.item.HoeItem;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.Items;
 import net.minecraft.world.level.LevelReader;
-import net.minecraft.world.level.block.AzaleaBlock;
-import net.minecraft.world.level.block.Block;
-import net.minecraft.world.level.block.Blocks;
-import net.minecraft.world.level.block.CocoaBlock;
-import net.minecraft.world.level.block.CropBlock;
-import net.minecraft.world.level.block.FarmBlock;
-import net.minecraft.world.level.block.MushroomBlock;
-import net.minecraft.world.level.block.NetherWartBlock;
-import net.minecraft.world.level.block.PitcherCropBlock;
-import net.minecraft.world.level.block.SaplingBlock;
-import net.minecraft.world.level.block.SoulSandBlock;
-import net.minecraft.world.level.block.StemBlock;
-import net.minecraft.world.level.block.SweetBerryBushBlock;
+import net.minecraft.world.level.block.*;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.phys.BlockHitResult;
 import net.minecraft.world.phys.Vec3;
@@ -233,7 +221,7 @@ public class AutoFarm extends Module {
                     break;
                 }
             }
-        } else if (block instanceof FarmBlock) {
+        } else if (block instanceof FarmlandBlock) {
             findItemResult = InvUtils.find(itemStack -> {
                 Item item = itemStack.getItem();
                 return item != Items.NETHER_WART && plantItems.get().contains(item);

@@ -10,7 +10,7 @@ import meteordevelopment.meteorclient.systems.modules.Module;
 import meteordevelopment.meteorclient.utils.Utils;
 import meteordevelopment.orbit.EventHandler;
 import net.minecraft.client.gui.screens.recipebook.RecipeCollection;
-import net.minecraft.world.inventory.ClickType;
+import net.minecraft.world.inventory.ContainerInput;
 import net.minecraft.world.inventory.CraftingMenu;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
@@ -84,7 +84,7 @@ public class AutoCraft extends Module {
 
                     mc.gameMode.handlePlaceRecipe(currentScreenHandler.containerId, recipe.id(), craftAll.get());
                     mc.gameMode.handleInventoryMouseClick(currentScreenHandler.containerId, 0, 1,
-                            drop.get() ? ClickType.THROW : ClickType.QUICK_MOVE, mc.player);
+                            drop.get() ? ContainerInput.THROW : ContainerInput.QUICK_MOVE, mc.player);
                 }
             }
         }

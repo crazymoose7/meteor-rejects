@@ -11,7 +11,7 @@ import meteordevelopment.meteorclient.utils.render.PeekScreen;
 import meteordevelopment.orbit.EventHandler;
 import net.minecraft.client.KeyMapping;
 import net.minecraft.client.Minecraft;
-import net.minecraft.client.gui.GuiGraphics;
+import net.minecraft.client.gui.GuiGraphicsExtractor;
 import net.minecraft.client.gui.screens.ChatScreen;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.client.gui.screens.inventory.InventoryScreen;
@@ -116,7 +116,7 @@ public class InteractionScreen extends Screen {
 
         functions.put("Spectate", (Entity e) -> {
             Minecraft.getInstance().setCameraEntity(e);
-            minecraft.player.displayClientMessage(Component.literal("Sneak to un-spectate."), true);
+            minecraft.player.sendSystemMessage(Component.literal("Sneak to un-spectate."), true);
             MeteorClient.EVENT_BUS.subscribe(shiftListener);
             closeScreen();
         });
@@ -246,14 +246,14 @@ public class InteractionScreen extends Screen {
         return false;
     }
 
-    public void render(GuiGraphics context, int mouseX, int mouseY, float delta) {
+    public void render(GuiGraphicsExtractor graphics, int mouseX, int mouseY, float delta) {
         // Draw crosshair icon (simplified - using drawTexture instead)
-        // context.drawGuiTexture(GUI_ICONS_TEXTURE, crosshairX - 8, crosshairY - 8, 0, 0, 15, 15);
+        // graphics.drawGuiTexture(GUI_ICONS_TEXTURE, crosshairX - 8, crosshairY - 8, 0, 0, 15, 15);
 
-        drawDots(context, (int) (Math.min(height, width) / 2 * 0.75), mouseX, mouseY);
+        drawDots(graphics, (int) (Math.min(height, width) / 2 * 0.75), mouseX, mouseY);
 
         // Draw entity name (without scaling, as Matrix3x2fStack doesn't support push/pop/scale in 3D)
-        context.drawCenteredString(font, entity.getName(), width / 2, 12, 0xFFFFFFFF);
+        graphics.centeredText(font, entity.getName(), width / 2, 12, 0xFFFFFFFF);
 
         Vector2f mouse = getMouseVecs(mouseX, mouseY);
 
@@ -262,7 +262,7 @@ public class InteractionScreen extends Screen {
 
         minecraft.player.setYRot(yaw + mouse.x / 3);
         minecraft.player.setXRot(Mth.clamp(pitch + mouse.y / 3, -90f, 90f));
-        super.render(context, mouseX, mouseY, delta);
+        super.extractRenderState(graphics, mouseX, mouseY, delta);
     }
 
     private Vector2f getMouseVecs(int mouseX, int mouseY) {
@@ -281,7 +281,7 @@ public class InteractionScreen extends Screen {
         return mouse;
     }
 
-    private void drawDots(GuiGraphics context, int radius, int mouseX, int mouseY) {
+    private void drawDots(GuiGraphicsExtractor graphics, int radius, int mouseX, int mouseY) {
         ArrayList<Point> pointList = new ArrayList<Point>();
         String[] cache = new String[functions.size()];
         double lowestDistance = Double.MAX_VALUE;
@@ -292,7 +292,7 @@ public class InteractionScreen extends Screen {
             double s = (double) i / functions.size() * 2 * Math.PI;
             int x = (int) Math.round(radius * Math.cos(s) + width / 2);
             int y = (int) Math.round(radius * Math.sin(s) + height / 2);
-            drawTextField(context, x, y, string);
+            drawTextField(graphics, x, y, string);
 
             // Calculate lowest distance between mouse and dot
             if (Math.hypot(x - mouseX, y - mouseY) < lowestDistance) {
@@ -309,46 +309,46 @@ public class InteractionScreen extends Screen {
         for (int j = 0; j < functions.size(); j++) {
             Point point = pointList.get(j);
             if (pointList.get(focusedDot) == point) {
-                drawDot(context, point.x - 4, point.y - 4, selectedDotColor);
+                drawDot(graphics, point.x - 4, point.y - 4, selectedDotColor);
                 this.focusedString = cache[focusedDot];
             } else
-                drawDot(context, point.x - 4, point.y - 4, dotColor);
+                drawDot(graphics, point.x - 4, point.y - 4, dotColor);
         }
     }
 
-    private void drawRect(GuiGraphics context, int startX, int startY, int width, int height, int colorInner, int colorOuter) {
-        context.hLine(startX, startX + width, startY, colorOuter);
-        context.hLine(startX, startX + width, startY + height, colorOuter);
-        context.vLine(startX, startY, startY + height, colorOuter);
-        context.vLine(startX + width, startY, startY + height, colorOuter);
-        context.fill(startX + 1, startY + 1, startX + width, startY + height, colorInner);
+    private void drawRect(GuiGraphicsExtractor graphics, int startX, int startY, int width, int height, int colorInner, int colorOuter) {
+        graphics.horizontalLine(startX, startX + width, startY, colorOuter);
+        graphics.horizontalLine(startX, startX + width, startY + height, colorOuter);
+        graphics.verticalLine(startX, startY, startY + height, colorOuter);
+        graphics.verticalLine(startX + width, startY, startY + height, colorOuter);
+        graphics.fill(startX + 1, startY + 1, startX + width, startY + height, colorInner);
     }
 
-    private void drawTextField(GuiGraphics context, int x, int y, String key) {
+    private void drawTextField(GuiGraphicsExtractor graphics, int x, int y, String key) {
         if (x >= width / 2) {
-            drawRect(context, x + 10, y - 8, font.width(key) + 3, 15, backgroundColor, borderColor);
-            context.drawString(font, key, x + 12, y - 4, textColor);
+            drawRect(graphics, x + 10, y - 8, font.width(key) + 3, 15, backgroundColor, borderColor);
+            graphics.text(font, key, x + 12, y - 4, textColor);
         } else {
-            drawRect(context, x - 14 - font.width(key), y - 8, font.width(key) + 3, 15, backgroundColor, borderColor);
-            context.drawString(font, key, x - 12 - font.width(key), y - 4, textColor);
+            drawRect(graphics, x - 14 - font.width(key), y - 8, font.width(key) + 3, 15, backgroundColor, borderColor);
+            graphics.text(font, key, x - 12 - font.width(key), y - 4, textColor);
         }
     }
 
     // Literally drawing it in code
-    private void drawDot(GuiGraphics context, int startX, int startY, int colorInner) {
+    private void drawDot(GuiGraphicsExtractor graphics, int startX, int startY, int colorInner) {
         // Draw dot itself
-        context.hLine(startX + 2, startX + 5, startY, borderColor);
-        context.hLine(startX + 1, startX + 6, startY + 1, borderColor);
-        context.hLine(startX + 2, startX + 5, startY + 1, colorInner);
-        context.fill(startX, startY + 2, startX + 8, startY + 6, borderColor);
-        context.fill(startX + 1, startY + 2, startX + 7, startY + 6, colorInner);
-        context.hLine(startX + 1, startX + 6, startY + 6, borderColor);
-        context.hLine(startX + 2, startX + 5, startY + 6, colorInner);
-        context.hLine(startX + 2, startX + 5, startY + 7, borderColor);
+        graphics.horizontalLine(startX + 2, startX + 5, startY, borderColor);
+        graphics.horizontalLine(startX + 1, startX + 6, startY + 1, borderColor);
+        graphics.horizontalLine(startX + 2, startX + 5, startY + 1, colorInner);
+        graphics.fill(startX, startY + 2, startX + 8, startY + 6, borderColor);
+        graphics.fill(startX + 1, startY + 2, startX + 7, startY + 6, colorInner);
+        graphics.horizontalLine(startX + 1, startX + 6, startY + 6, borderColor);
+        graphics.horizontalLine(startX + 2, startX + 5, startY + 6, colorInner);
+        graphics.horizontalLine(startX + 2, startX + 5, startY + 7, borderColor);
 
         // Draw light overlay
-        context.hLine(startX + 2, startX + 3, startY + 1, 0x80FFFFFF);
-        context.hLine(startX + 1, startX + 1, startY + 2, 0x80FFFFFF);
+        graphics.horizontalLine(startX + 2, startX + 3, startY + 1, 0x80FFFFFF);
+        graphics.horizontalLine(startX + 1, startX + 1, startY + 2, 0x80FFFFFF);
     }
 
     private class StaticListener {
